@@ -1,6 +1,6 @@
--- Top 5 Host With The Most query
+-- Top 5 Host With The Most query for BigQuery
 -- This query should return the top 5 users by hosting/event metrics
--- Replace table names and column names with your actual schema
+-- Replace table names and column names with your actual BigQuery schema
 
 WITH hosting_metrics AS (
   SELECT 
@@ -8,9 +8,9 @@ WITH hosting_metrics AS (
     u.display_name,
     COUNT(e.event_id) as events_hosted,
     'events' as unit
-  FROM users u
-  LEFT JOIN events e ON u.user_id = e.host_id
-  WHERE DATE_TRUNC('month', e.event_date) = $1::date
+  FROM `your-project.your-dataset.users` u
+  LEFT JOIN `your-project.your-dataset.events` e ON u.user_id = e.host_id
+  WHERE DATE_TRUNC(DATE(e.event_date), MONTH) = DATE('$1')
     AND e.status = 'completed' -- Only count completed events
   GROUP BY u.user_id, u.display_name
 ),

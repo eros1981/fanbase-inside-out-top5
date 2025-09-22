@@ -1,6 +1,6 @@
--- Top 5 Eyeball Emperors query
+-- Top 5 Eyeball Emperors query for BigQuery
 -- This query should return the top 5 users by view/engagement metrics
--- Replace table names and column names with your actual schema
+-- Replace table names and column names with your actual BigQuery schema
 
 WITH engagement_metrics AS (
   SELECT 
@@ -8,10 +8,10 @@ WITH engagement_metrics AS (
     u.display_name,
     COALESCE(SUM(v.view_count), 0) as total_views,
     'views' as unit
-  FROM users u
-  LEFT JOIN content c ON u.user_id = c.user_id
-  LEFT JOIN content_views v ON c.content_id = v.content_id
-  WHERE DATE_TRUNC('month', v.viewed_at) = $1::date
+  FROM `your-project.your-dataset.users` u
+  LEFT JOIN `your-project.your-dataset.content` c ON u.user_id = c.user_id
+  LEFT JOIN `your-project.your-dataset.content_views` v ON c.content_id = v.content_id
+  WHERE DATE_TRUNC(DATE(v.viewed_at), MONTH) = DATE('$1')
   GROUP BY u.user_id, u.display_name
 ),
 ranked_eyeball_emperors AS (

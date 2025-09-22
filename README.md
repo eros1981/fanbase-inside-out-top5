@@ -26,7 +26,7 @@ The system consists of two main services:
 ### Prerequisites
 
 - Node.js 20+
-- PostgreSQL database
+- Google Cloud BigQuery project with production data clone
 - Slack workspace with admin access
 - Railway account (for deployment) or Docker (for local development)
 
@@ -39,11 +39,12 @@ The system consists of two main services:
    cd fanbase-inside-out-top5
    ```
 
-2. **Start the database:**
-
+2. **Setup BigQuery credentials:**
    ```bash
-   cd infra
-   docker-compose up postgres -d
+   # Place your service account key in infra/credentials/service-account-key.json
+   mkdir -p infra/credentials
+   # Download your service account key from Google Cloud Console
+   # and place it as infra/credentials/service-account-key.json
    ```
 
 3. **Setup Slack Bot:**
@@ -61,7 +62,7 @@ The system consists of two main services:
    ```bash
    cd ../query-service
    cp env.example .env
-   # Edit .env with your database URL and HMAC secret
+   # Edit .env with your BigQuery credentials and HMAC secret
    npm install
    npm run dev
    ```
@@ -144,8 +145,12 @@ PORT=3000
 #### Query Service (`query-service/.env`)
 
 ```bash
-# Database Configuration
-DB_URL=postgres://user:password@localhost:5432/fanbase_db
+# BigQuery Configuration
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
+# Alternative: Use service account key as JSON string
+# GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"..."}
+BIGQUERY_PROJECT_ID=your-project-id
+BIGQUERY_DATASET=your-dataset
 
 # Security
 HMAC_SECRET_SHARED=your_shared_hmac_secret_here
@@ -155,9 +160,9 @@ DEFAULT_TIMEZONE=America/New_York
 PORT=3001
 ```
 
-## 🗄️ Database Schema
+## 🗄️ BigQuery Schema
 
-The system expects the following tables (customize based on your schema):
+The system expects the following tables in your BigQuery dataset (customize based on your schema):
 
 - `users` - User information
 - `revenue_transactions` - Revenue data for Monetizer category
@@ -166,7 +171,7 @@ The system expects the following tables (customize based on your schema):
 - `events` - Event data for Host With The Most category
 - `product_feedback` - Feedback data for Product Whisperer category
 
-See `infra/init.sql` for sample schema and data.
+**Important:** Update the table references in the SQL files (`sql/*.sql`) to use your actual BigQuery project and dataset names in the format: `your-project.your-dataset.table_name`
 
 ## 🔒 Security
 
