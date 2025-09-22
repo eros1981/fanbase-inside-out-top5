@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "services": {
+    "slack-bot": {
+      "source": "./slack-bot",
+      "build": {
+        "builder": "NIXPACKS"
+      },
+      "deploy": {
+        "startCommand": "npm run start",
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 100,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "variables": {
+        "NODE_ENV": "production"
+      }
+    },
+    "query-service": {
+      "source": "./query-service",
+      "build": {
+        "builder": "NIXPACKS"
+      },
+      "deploy": {
+        "startCommand": "npm run start",
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 100,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "variables": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
