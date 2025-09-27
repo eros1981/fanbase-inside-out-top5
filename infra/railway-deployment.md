@@ -3,6 +3,7 @@
 ## 🚀 Deploy to Railway
 
 ### Prerequisites
+
 - Railway account (https://railway.app)
 - GitHub repository connected to Railway
 - BigQuery service account key file
@@ -18,6 +19,7 @@
 ### Step 2: Configure Environment Variables
 
 #### For Query Service (`fanbase-query-service`):
+
 ```bash
 # BigQuery Configuration
 GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
@@ -34,6 +36,7 @@ DEFAULT_TIMEZONE=America/New_York
 ```
 
 #### For Slack Bot (`fanbase-slack-bot`):
+
 ```bash
 # Slack Configuration
 SLACK_SIGNING_SECRET=your_slack_signing_secret_here
@@ -90,15 +93,18 @@ DEFAULT_TIMEZONE=America/New_York
 ### Common Issues:
 
 1. **Service Account Key Issues**:
+
    - Ensure the key file is uploaded correctly
    - Check the file path in environment variables
    - Verify the key has proper BigQuery permissions
 
 2. **HMAC Secret Mismatch**:
+
    - Ensure both services use the same `HMAC_SECRET_SHARED` value
    - Check the `QUERY_SERVICE_HMAC_SECRET` matches
 
 3. **Slack App Issues**:
+
    - Verify the Request URL is correct
    - Check Slack app permissions
    - Ensure bot token is valid
@@ -118,14 +124,14 @@ DEFAULT_TIMEZONE=America/New_York
 
 ## 📊 Environment Variables Summary
 
-| Variable | Service | Description |
-|----------|---------|-------------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | Query Service | Path to BigQuery service account key |
-| `BIGQUERY_PROJECT_ID` | Query Service | Your BigQuery project ID (758470639878) |
-| `BIGQUERY_DATASET` | Query Service | Your BigQuery dataset name |
-| `HMAC_SECRET_SHARED` | Both | Shared secret for service authentication |
-| `SLACK_SIGNING_SECRET` | Slack Bot | Slack app signing secret |
-| `SLACK_BOT_TOKEN` | Slack Bot | Slack bot token |
-| `SLACK_APP_TOKEN` | Slack Bot | Slack app token |
-| `ALLOWED_USERGROUP_ID` | Slack Bot | HR usergroup ID for access control |
-| `QUERY_SERVICE_URL` | Slack Bot | URL of the deployed query service |
+| Variable                         | Service       | Description                              |
+| -------------------------------- | ------------- | ---------------------------------------- |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Query Service | Path to BigQuery service account key     |
+| `BIGQUERY_PROJECT_ID`            | Query Service | Your BigQuery project ID (758470639878)  |
+| `BIGQUERY_DATASET`               | Query Service | Your BigQuery dataset name               |
+| `HMAC_SECRET_SHARED`             | Both          | Shared secret for service authentication |
+| `SLACK_SIGNING_SECRET`           | Slack Bot     | Slack app signing secret                 |
+| `SLACK_BOT_TOKEN`                | Slack Bot     | Slack bot token                          |
+| `SLACK_APP_TOKEN`                | Slack Bot     | Slack app token                          |
+| `ALLOWED_USERGROUP_ID`           | Slack Bot     | HR usergroup ID for access control       |
+| `QUERY_SERVICE_URL`              | Slack Bot     | URL of the deployed query service        |
