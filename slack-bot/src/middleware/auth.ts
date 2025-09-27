@@ -9,6 +9,13 @@ import { logger } from '../utils/logger';
  */
 export async function verifyHRAccess(client: WebClient, userId: string): Promise<boolean> {
   try {
+    // Debug: Log all environment variables related to authorization
+    logger.info('Authorization check', { 
+      userId, 
+      ALLOWED_USER_IDS: process.env.ALLOWED_USER_IDS,
+      ALLOWED_USERGROUP_ID: process.env.ALLOWED_USERGROUP_ID
+    });
+
     // Check if using user ID allowlist first (higher priority)
     if (process.env.ALLOWED_USER_IDS) {
       const allowedUserIds = process.env.ALLOWED_USER_IDS.split(',').map(id => id.trim());
