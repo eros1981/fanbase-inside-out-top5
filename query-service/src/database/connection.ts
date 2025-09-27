@@ -19,9 +19,27 @@ export async function initializeDatabase(): Promise<void> {
       logger.warn('GOOGLE_APPLICATION_CREDENTIALS not set - using default credentials');
     }
 
+    // Check if credentialsPath is JSON content or file path
+    let credentials = undefined;
+    if (credentialsPath) {
+      if (credentialsPath.startsWith('{')) {
+        // It's JSON content, parse it
+        try {
+          credentials = JSON.parse(credentialsPath);
+          logger.info('Using JSON credentials for BigQuery');
+        } catch (error) {
+          logger.error('Failed to parse JSON credentials:', error);
+          throw new Error('Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS');
+        }
+      } else {
+        // It's a file path
+        logger.info('Using credentials file for BigQuery', { credentialsPath });
+      }
+    }
+
     bigquery = new BigQuery({
       projectId: projectId || '758470639878',
-      ...(credentialsPath && { keyFilename: credentialsPath }),
+      ...(credentials ? { credentials } : credentialsPath ? { keyFilename: credentialsPath } : {}),
     });
 
     // Test the connection by listing datasets
