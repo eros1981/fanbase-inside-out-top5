@@ -49,9 +49,9 @@ export async function handleInsideOutCommand(
     };
 
     // Create HMAC signature for authentication
-    const hmacSecret = process.env.QUERY_SERVICE_HMAC_SECRET;
+    const hmacSecret = process.env.HMAC_SECRET_SHARED;
     if (!hmacSecret) {
-      throw new Error('QUERY_SERVICE_HMAC_SECRET not configured');
+      throw new Error('HMAC_SECRET_SHARED not configured');
     }
 
     const signature = createHmac('sha256', hmacSecret)
