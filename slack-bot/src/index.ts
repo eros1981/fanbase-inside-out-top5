@@ -54,7 +54,7 @@ app.command('/insideout', async ({ command, ack, respond, client }) => {
 });
 
 // Add a simple health check endpoint
-app.get('/health', (req, res) => {
+app.receiver.router.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
