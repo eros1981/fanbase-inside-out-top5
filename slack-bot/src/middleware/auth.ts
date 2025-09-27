@@ -9,6 +9,14 @@ import { logger } from '../utils/logger';
  */
 export async function verifyHRAccess(client: WebClient, userId: string): Promise<boolean> {
   try {
+    // Check if using user ID allowlist first (higher priority)
+    if (process.env.ALLOWED_USER_IDS) {
+      const allowedUserIds = process.env.ALLOWED_USER_IDS.split(',').map(id => id.trim());
+      const hasAccess = allowedUserIds.includes(userId);
+      logger.debug('User ID allowlist check', { userId, hasAccess, allowedUserIds });
+      return hasAccess;
+    }
+
     // Check if using usergroup-based authorization
     if (process.env.ALLOWED_USERGROUP_ID) {
       const usergroupId = process.env.ALLOWED_USERGROUP_ID;
@@ -19,14 +27,10 @@ export async function verifyHRAccess(client: WebClient, userId: string): Promise
       });
 
       if (usergroupUsers.ok && usergroupUsers.users) {
-        return usergroupUsers.users.includes(userId);
+        const hasAccess = usergroupUsers.users.includes(userId);
+        logger.debug('Usergroup check', { userId, hasAccess, usergroupId });
+        return hasAccess;
       }
-    }
-
-    // Check if using user ID allowlist
-    if (process.env.ALLOWED_USER_IDS) {
-      const allowedUserIds = process.env.ALLOWED_USER_IDS.split(',').map(id => id.trim());
-      return allowedUserIds.includes(userId);
     }
 
     // If no authorization method is configured, deny access
