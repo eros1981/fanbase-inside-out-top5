@@ -12,16 +12,16 @@ export async function initializeDatabase(): Promise<void> {
     const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     
     if (!projectId) {
-      throw new Error('BIGQUERY_PROJECT_ID environment variable is required');
+      logger.warn('BIGQUERY_PROJECT_ID not set - using default project');
     }
 
     if (!credentialsPath) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS environment variable is required');
+      logger.warn('GOOGLE_APPLICATION_CREDENTIALS not set - using default credentials');
     }
 
     bigquery = new BigQuery({
-      projectId,
-      keyFilename: credentialsPath,
+      projectId: projectId || '758470639878',
+      ...(credentialsPath && { keyFilename: credentialsPath }),
     });
 
     // Test the connection by listing datasets
@@ -29,7 +29,12 @@ export async function initializeDatabase(): Promise<void> {
     logger.info(`BigQuery connection established successfully. Found ${datasets.length} datasets.`);
   } catch (error) {
     logger.error('Failed to initialize BigQuery connection:', error);
-    throw error;
+    // Don't throw error in production - allow service to start
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('Continuing without BigQuery connection - will fail on query requests');
+    } else {
+      throw error;
+    }
   }
 }
 

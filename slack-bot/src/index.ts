@@ -9,8 +9,8 @@ config();
 
 // Initialize Slack app
 const app = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  token: process.env.SLACK_BOT_TOKEN || 'xoxb-placeholder',
+  signingSecret: process.env.SLACK_SIGNING_SECRET || 'placeholder-secret',
   socketMode: !!process.env.SLACK_APP_TOKEN,
   appToken: process.env.SLACK_APP_TOKEN,
   logLevel: LogLevel.INFO,

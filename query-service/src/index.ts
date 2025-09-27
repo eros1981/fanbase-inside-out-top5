@@ -12,9 +12,11 @@ config();
 const app = Fastify({
   logger: {
     level: 'info',
-    transport: {
-      target: 'pino-pretty'
-    }
+    ...(process.env.NODE_ENV === 'development' && {
+      transport: {
+        target: 'pino-pretty'
+      }
+    })
   }
 });
 
