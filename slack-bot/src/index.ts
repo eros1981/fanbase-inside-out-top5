@@ -53,20 +53,8 @@ app.command('/insideout', async ({ command, ack, respond, client }) => {
   }
 });
 
-// Add a simple health check endpoint
-app.receiver.router.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    env: {
-      SLACK_SIGNING_SECRET: process.env.SLACK_SIGNING_SECRET ? 'set' : 'missing',
-      SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN ? 'set' : 'missing',
-      SLACK_APP_TOKEN: process.env.SLACK_APP_TOKEN ? 'set' : 'missing',
-      ALLOWED_USER_IDS: process.env.ALLOWED_USER_IDS || 'not set',
-      ALLOWED_USERGROUP_ID: process.env.ALLOWED_USERGROUP_ID || 'not set'
-    }
-  });
-});
+// Note: Health endpoint removed due to Slack Bolt limitations
+// We'll use the startup logs to debug environment variables
 
 // Start the app
 (async () => {
