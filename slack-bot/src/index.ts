@@ -23,8 +23,17 @@ app.command('/insideout', async ({ command, ack, respond, client }) => {
     // Acknowledge the command immediately
     await ack();
 
+    // Debug: Log command received
+    logger.info('Slash command received', { 
+      userId: command.user_id, 
+      text: command.text,
+      channel: command.channel_id 
+    });
+
     // Verify HR access
     const hasAccess = await verifyHRAccess(client, command.user_id);
+    logger.info('HR access check result', { userId: command.user_id, hasAccess });
+    
     if (!hasAccess) {
       await respond({
         text: '❌ Access denied. This command is restricted to HR team members.',
@@ -44,11 +53,33 @@ app.command('/insideout', async ({ command, ack, respond, client }) => {
   }
 });
 
+// Add a simple health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    env: {
+      SLACK_SIGNING_SECRET: process.env.SLACK_SIGNING_SECRET ? 'set' : 'missing',
+      SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN ? 'set' : 'missing',
+      SLACK_APP_TOKEN: process.env.SLACK_APP_TOKEN ? 'set' : 'missing',
+      ALLOWED_USER_IDS: process.env.ALLOWED_USER_IDS || 'not set',
+      ALLOWED_USERGROUP_ID: process.env.ALLOWED_USERGROUP_ID || 'not set'
+    }
+  });
+});
+
 // Start the app
 (async () => {
   try {
     await app.start();
     logger.info('🚀 Slack bot is running!');
+    logger.info('Environment check', {
+      SLACK_SIGNING_SECRET: process.env.SLACK_SIGNING_SECRET ? 'set' : 'missing',
+      SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN ? 'set' : 'missing',
+      SLACK_APP_TOKEN: process.env.SLACK_APP_TOKEN ? 'set' : 'missing',
+      ALLOWED_USER_IDS: process.env.ALLOWED_USER_IDS || 'not set',
+      ALLOWED_USERGROUP_ID: process.env.ALLOWED_USERGROUP_ID || 'not set'
+    });
   } catch (error) {
     logger.error('Failed to start Slack bot:', error);
     process.exit(1);
