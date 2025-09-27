@@ -17,12 +17,21 @@ export async function handleInsideOutCommand(
   try {
     // Parse command arguments
     const { month, year, category } = parseCommandArgs(command.text);
+    
+    // Debug: Log parsed arguments
+    logger.info('Parsed command arguments', { 
+      originalText: command.text,
+      month, 
+      year, 
+      category 
+    });
 
     // Validate category if specified
     const validCategories = ['monetizer', 'content_machine', 'eyeball_emperor', 'host_with_the_most', 'product_whisperer', 'all'];
     if (category && !validCategories.includes(category)) {
+      logger.warn('Invalid category provided', { category, validCategories });
       await respond({
-        text: `❌ Invalid category. Valid options: ${validCategories.join(', ')}`,
+        text: `❌ Invalid category "${category}". Valid options: ${validCategories.join(', ')}`,
         response_type: 'ephemeral'
       });
       return;
