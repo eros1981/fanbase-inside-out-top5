@@ -21,10 +21,16 @@ export function parseCommandArgs(text: string): { month: string; year: string; c
   let year: string;
   let category: string | null = null;
 
+  // Handle "top5" prefix - skip it if present
+  let startIndex = 0;
+  if (args[0].toLowerCase() === 'top5') {
+    startIndex = 1;
+  }
+
   // Parse month and year
-  if (args.length >= 2) {
-    const monthArg = args[0].toLowerCase();
-    const yearArg = args[1];
+  if (args.length >= startIndex + 2) {
+    const monthArg = args[startIndex].toLowerCase();
+    const yearArg = args[startIndex + 1];
 
     // Handle month parsing
     if (monthArg === 'last-month' || monthArg === 'last') {
@@ -59,8 +65,8 @@ export function parseCommandArgs(text: string): { month: string; year: string; c
     }
 
     // Parse category if provided
-    if (args.length >= 3) {
-      category = args[2].toLowerCase();
+    if (args.length >= startIndex + 3) {
+      category = args[startIndex + 2].toLowerCase();
     }
   } else {
     // Fallback to current month if only one argument
