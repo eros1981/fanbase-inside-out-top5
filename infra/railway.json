@@ -1,7 +1,7 @@
 {
   "version": 2,
   "services": {
-    "slack-bot": {
+    "fanbase-slack-bot": {
       "source": "./slack-bot",
       "build": {
         "builder": "NIXPACKS"
@@ -14,10 +14,11 @@
         "restartPolicyMaxRetries": 10
       },
       "variables": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "PORT": "3000"
       }
     },
-    "query-service": {
+    "fanbase-query-service": {
       "source": "./query-service",
       "build": {
         "builder": "NIXPACKS"
@@ -30,7 +31,8 @@
         "restartPolicyMaxRetries": 10
       },
       "variables": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "PORT": "3001"
       }
     }
   }

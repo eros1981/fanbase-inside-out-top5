@@ -9,35 +9,24 @@ let bigquery: BigQuery | null = null;
 export async function initializeDatabase(): Promise<void> {
   try {
     const projectId = process.env.BIGQUERY_PROJECT_ID;
+    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     
     if (!projectId) {
       throw new Error('BIGQUERY_PROJECT_ID environment variable is required');
     }
 
-    // Initialize BigQuery client
+    if (!credentialsPath) {
+      throw new Error('GOOGLE_APPLICATION_CREDENTIALS environment variable is required');
+    }
+
     bigquery = new BigQuery({
       projectId,
-      // Credentials will be automatically loaded from:
-      // 1. GOOGLE_APPLICATION_CREDENTIALS environment variable
-      // 2. GOOGLE_SERVICE_ACCOUNT_KEY environment variable (JSON string)
-      // 3. Default service account (if running on GCP)
+      keyFilename: credentialsPath,
     });
 
-    // Test the connection by running a simple query
+    // Test the connection by listing datasets
     const [datasets] = await bigquery.getDatasets();
     logger.info(`BigQuery connection established successfully. Found ${datasets.length} datasets.`);
-
-    // Verify the specified dataset exists
-    const datasetId = process.env.BIGQUERY_DATASET;
-    if (datasetId) {
-      const dataset = bigquery.dataset(datasetId);
-      const [exists] = await dataset.exists();
-      if (!exists) {
-        logger.warn(`Dataset ${datasetId} does not exist. Please create it or update BIGQUERY_DATASET.`);
-      } else {
-        logger.info(`Using dataset: ${datasetId}`);
-      }
-    }
   } catch (error) {
     logger.error('Failed to initialize BigQuery connection:', error);
     throw error;
@@ -56,25 +45,22 @@ export function getBigQuery(): BigQuery {
 }
 
 /**
- * Gets the dataset reference
- * @returns Dataset reference
+ * Gets the dataset name from environment
+ * @returns Dataset name
  */
-export function getDataset() {
-  const bigquery = getBigQuery();
-  const datasetId = process.env.BIGQUERY_DATASET;
-  
-  if (!datasetId) {
+export function getDatasetName(): string {
+  const dataset = process.env.BIGQUERY_DATASET;
+  if (!dataset) {
     throw new Error('BIGQUERY_DATASET environment variable is required');
   }
-  
-  return bigquery.dataset(datasetId);
+  return dataset;
 }
 
 /**
  * Closes the BigQuery connection (no-op for BigQuery)
  */
 export async function closeDatabase(): Promise<void> {
-  // BigQuery client doesn't need explicit closing
+  // BigQuery doesn't require explicit connection closing
   bigquery = null;
   logger.info('BigQuery connection closed');
 }

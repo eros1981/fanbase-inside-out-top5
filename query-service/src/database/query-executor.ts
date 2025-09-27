@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { logger } from '../utils/logger';
-import { getBigQuery, getDataset } from './connection';
+import { getBigQuery, getDatasetName } from './connection';
 
 /**
  * Executes a query for a specific category and month
@@ -11,21 +11,20 @@ import { getBigQuery, getDataset } from './connection';
  */
 export async function executeQuery(category: string, month: string): Promise<any[]> {
   const bigquery = getBigQuery();
-  const dataset = getDataset();
+  const datasetName = getDatasetName();
   
   try {
     // Load the SQL query file
     const sqlFile = join(process.cwd(), '..', 'sql', `${category}_top5.sql`);
     let query = readFileSync(sqlFile, 'utf8');
 
-    // Replace the parameter placeholder with the actual month value
-    // BigQuery uses @param_name syntax, but we'll use string replacement for simplicity
-    query = query.replace(/\$1/g, `'${month}'`);
+    // Replace $1 parameter with the month value for BigQuery
+    query = query.replace(/\$1::date/g, `'${month}'`);
 
     // Execute the query
     const [rows] = await bigquery.query({
       query,
-      location: 'US', // Specify location if needed
+      location: 'US', // Adjust if your data is in a different location
     });
 
     // Transform results to match expected format

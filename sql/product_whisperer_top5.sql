@@ -1,6 +1,6 @@
--- Top 5 Product Whisperers query for BigQuery
+-- Top 5 Product Whisperers query
 -- This query should return the top 5 users by product feedback/contribution metrics
--- Replace table names and column names with your actual BigQuery schema
+-- Replace table names and column names with your actual schema
 
 WITH product_metrics AS (
   SELECT 
@@ -8,9 +8,9 @@ WITH product_metrics AS (
     u.display_name,
     COUNT(f.feedback_id) as feedback_count,
     'suggestions' as unit
-  FROM `your-project.your-dataset.users` u
-  LEFT JOIN `your-project.your-dataset.product_feedback` f ON u.user_id = f.user_id
-  WHERE DATE_TRUNC(DATE(f.submitted_at), MONTH) = DATE('$1')
+  FROM users u
+  LEFT JOIN product_feedback f ON u.user_id = f.user_id
+  WHERE DATE_TRUNC('month', f.submitted_at) = $1::date
     AND f.status = 'accepted' -- Only count accepted feedback
   GROUP BY u.user_id, u.display_name
 ),

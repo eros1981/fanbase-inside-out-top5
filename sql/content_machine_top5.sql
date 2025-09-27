@@ -1,6 +1,6 @@
--- Top 5 Content Machines query for BigQuery
+-- Top 5 Content Machines query
 -- This query should return the top 5 users by content creation metrics
--- Replace table names and column names with your actual BigQuery schema
+-- Replace table names and column names with your actual schema
 
 WITH content_metrics AS (
   SELECT 
@@ -8,9 +8,9 @@ WITH content_metrics AS (
     u.display_name,
     COUNT(c.content_id) as content_count,
     'posts' as unit
-  FROM `your-project.your-dataset.users` u
-  LEFT JOIN `your-project.your-dataset.content` c ON u.user_id = c.user_id
-  WHERE DATE_TRUNC(DATE(c.created_at), MONTH) = DATE('$1')
+  FROM users u
+  LEFT JOIN content c ON u.user_id = c.user_id
+  WHERE DATE_TRUNC('month', c.created_at) = $1::date
     AND c.status = 'published' -- Only count published content
   GROUP BY u.user_id, u.display_name
 ),

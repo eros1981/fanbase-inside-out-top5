@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: fanbase_db
+      POSTGRES_USER: fanbase_user
+      POSTGRES_PASSWORD: fanbase_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U fanbase_user -d fanbase_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Query Service
   query-service:
     build:
@@ -8,17 +26,17 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=development
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account-key.json
-      - BIGQUERY_PROJECT_ID=your-project-id
-      - BIGQUERY_DATASET=your-dataset
+      - DB_URL=postgres://fanbase_user:fanbase_password@postgres:5432/fanbase_db
       - HMAC_SECRET_SHARED=your_shared_hmac_secret_here
       - DEFAULT_TIMEZONE=America/New_York
       - PORT=3001
     ports:
       - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
       - ../sql:/app/sql:ro
-      - ./credentials:/app/credentials:ro
 
   # Slack Bot
   slack-bot:
@@ -40,3 +58,6 @@ services:
     depends_on:
       query-service:
         condition: service_started
+
+volumes:
+  postgres_data:
