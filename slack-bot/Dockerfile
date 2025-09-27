@@ -16,6 +16,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Remove dev dependencies after build (as root user)
+RUN npm prune --production
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S slackbot -u 1001
@@ -25,9 +28,6 @@ RUN chown -R slackbot:nodejs /app
 
 # Switch to non-root user
 USER slackbot
-
-# Remove dev dependencies after build (as non-root user)
-RUN npm prune --production
 
 # Expose port
 EXPOSE 3000
