@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { logger } from '../utils/logger';
 
@@ -31,13 +31,12 @@ export async function verifyHMAC(request: FastifyRequest, reply: FastifyReply) {
     const body = JSON.stringify(request.body);
     
     // Create expected signature
-    const expectedSignature = crypto
-      .createHmac('sha256', hmacSecret)
+    const expectedSignature = createHmac('sha256', hmacSecret)
       .update(body)
       .digest('hex');
 
     // Compare signatures using timing-safe comparison
-    const isValid = crypto.timingSafeEqual(
+    const isValid = timingSafeEqual(
       Buffer.from(signature, 'hex'),
       Buffer.from(expectedSignature, 'hex')
     );

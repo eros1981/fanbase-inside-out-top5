@@ -1,6 +1,6 @@
 import { SlashCommand } from '@slack/bolt';
 import axios from 'axios';
-import crypto from 'crypto';
+import { createHmac } from 'crypto';
 import { formatTop5Response } from '../utils/block-kit';
 import { parseCommandArgs } from '../utils/command-parser';
 import { logger } from '../utils/logger';
@@ -45,8 +45,7 @@ export async function handleInsideOutCommand(
       throw new Error('QUERY_SERVICE_HMAC_SECRET not configured');
     }
 
-    const signature = crypto
-      .createHmac('sha256', hmacSecret)
+    const signature = createHmac('sha256', hmacSecret)
       .update(JSON.stringify(requestBody))
       .digest('hex');
 
