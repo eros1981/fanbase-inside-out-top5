@@ -32,6 +32,15 @@ export function parseCommandArgs(text: string): { month: string; year: string; c
     const monthArg = args[startIndex].toLowerCase();
     const yearArg = args[startIndex + 1];
 
+    // Debug: Log what we're parsing
+    console.log('Debug parsing:', { 
+      args, 
+      startIndex, 
+      monthArg, 
+      yearArg, 
+      argsLength: args.length 
+    });
+
     // Handle month parsing
     if (monthArg === 'last-month' || monthArg === 'last') {
       const lastMonth = new Date();
