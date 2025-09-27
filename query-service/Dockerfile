@@ -16,16 +16,18 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Remove dev dependencies after build
-RUN npm prune --production
-
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S queryservice -u 1001
 
 # Change ownership of the app directory
 RUN chown -R queryservice:nodejs /app
+
+# Switch to non-root user
 USER queryservice
+
+# Remove dev dependencies after build (as non-root user)
+RUN npm prune --production
 
 # Expose port
 EXPOSE 3001
