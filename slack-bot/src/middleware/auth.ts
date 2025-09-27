@@ -13,7 +13,7 @@ export async function verifyHRAccess(client: WebClient, userId: string): Promise
     if (process.env.ALLOWED_USER_IDS) {
       const allowedUserIds = process.env.ALLOWED_USER_IDS.split(',').map(id => id.trim());
       const hasAccess = allowedUserIds.includes(userId);
-      logger.debug('User ID allowlist check', { userId, hasAccess, allowedUserIds });
+      logger.info('User ID allowlist check', { userId, hasAccess, allowedUserIds });
       return hasAccess;
     }
 
@@ -28,7 +28,7 @@ export async function verifyHRAccess(client: WebClient, userId: string): Promise
 
       if (usergroupUsers.ok && usergroupUsers.users) {
         const hasAccess = usergroupUsers.users.includes(userId);
-        logger.debug('Usergroup check', { userId, hasAccess, usergroupId });
+        logger.info('Usergroup check', { userId, hasAccess, usergroupId });
         return hasAccess;
       }
     }
