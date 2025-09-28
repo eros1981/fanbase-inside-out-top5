@@ -16,7 +16,6 @@ WITH content AS (
   SELECT created_at, user_id FROM `758470639878.reporting_db.stories`
   UNION ALL
   SELECT created_at, user_id FROM `758470639878.reporting_db.tvs`
-  WHERE p_content_type IS NULL OR p_content_type = 'plus'
 ),
 monthly_content AS (
   SELECT
