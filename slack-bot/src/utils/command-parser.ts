@@ -63,13 +63,18 @@ export function parseCommandArgs(text: string): { month: string; year: string; c
         'jun': '06', 'june': '06',
         'jul': '07', 'july': '07',
         'aug': '08', 'august': '08',
-        'sep': '09', 'september': '09',
+        'sep': '09', 'sept': '09', 'september': '09',
         'oct': '10', 'october': '10',
         'nov': '11', 'november': '11',
         'dec': '12', 'december': '12'
       };
 
       month = monthMap[monthArg] || monthArg;
+      
+      // If month is still not a number, it means it wasn't found in the map
+      if (isNaN(parseInt(month))) {
+        month = monthArg; // Keep original for error handling
+      }
       year = yearArg;
     }
 
