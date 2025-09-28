@@ -5,8 +5,10 @@ import { verifyHMAC } from './middleware/auth';
 import { top5Handler } from './routes/top5';
 import { logger } from './utils/logger';
 
-// Load environment variables
-config();
+// Load environment variables (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  config();
+}
 
 // Initialize Fastify app
 const app = Fastify({
@@ -34,6 +36,15 @@ app.get('/health', async (request, reply) => {
 // Start the server
 const start = async () => {
   try {
+    // Debug: Log environment variables
+    logger.info('Environment check', {
+      NODE_ENV: process.env.NODE_ENV,
+      HMAC_SECRET_SHARED: process.env.HMAC_SECRET_SHARED ? 'set' : 'missing',
+      BIGQUERY_DATASET: process.env.BIGQUERY_DATASET ? 'set' : 'missing',
+      BIGQUERY_PROJECT_ID: process.env.BIGQUERY_PROJECT_ID ? 'set' : 'missing',
+      GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'set' : 'missing'
+    });
+
     // Initialize database connection
     await initializeDatabase();
     
