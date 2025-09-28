@@ -6,13 +6,17 @@ SELECT
   table_name,
   table_type,
   creation_time
-FROM `758470639878.fanbase_data.INFORMATION_SCHEMA.TABLES`
+FROM `758470639878.fanbase-reporting.INFORMATION_SCHEMA.TABLES`
 WHERE table_type = 'BASE TABLE'
 ORDER BY table_name;
 
--- Alternative: List tables with row counts
--- SELECT 
---   table_name,
---   row_count
--- FROM `758470639878.fanbase_data.__TABLES__`
--- ORDER BY row_count DESC;
+-- Test if specific tables exist and have data
+SELECT 'users' as table_name, COUNT(*) as row_count FROM `758470639878.fanbase-reporting.users` WHERE 1=1
+UNION ALL
+SELECT 'revenues' as table_name, COUNT(*) as row_count FROM `758470639878.fanbase-reporting.revenues` WHERE 1=1
+UNION ALL
+SELECT 'flickz' as table_name, COUNT(*) as row_count FROM `758470639878.fanbase-reporting.flickz` WHERE 1=1
+UNION ALL
+SELECT 'posts' as table_name, COUNT(*) as row_count FROM `758470639878.fanbase-reporting.posts` WHERE 1=1
+UNION ALL
+SELECT 'livestreams' as table_name, COUNT(*) as row_count FROM `758470639878.fanbase-reporting.livestreams` WHERE 1=1;
