@@ -55,20 +55,31 @@ export function formatTop5Response(data: any, requestedCategory: string): any[] 
         }
       });
     } else {
-      // Format the top 5 list
-      const top5List = categoryData.map((item: any, index: number) => {
-        const rank = item.rank || (index + 1);
-        const value = formatValue(item.value, item.unit);
-        return `${rank}. *${item.user}* - ${value}`;
-      }).join('\n');
+      // Special handling for Product Whisperer
+      if (category.key === 'product_whisperer') {
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${category.emoji} ${category.name}*\n${categoryData[0].user}`
+          }
+        });
+      } else {
+        // Format the top 5 list for other categories
+        const top5List = categoryData.map((item: any, index: number) => {
+          const rank = item.rank || (index + 1);
+          const value = formatValue(item.value, item.unit);
+          return `${rank}. *${item.user}* - ${value}`;
+        }).join('\n');
 
-      blocks.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*${category.emoji} ${category.name}*\n${top5List}`
-        }
-      });
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${category.emoji} ${category.name}*\n${top5List}`
+          }
+        });
+      }
     }
 
     // Add divider between categories (except for the last one)

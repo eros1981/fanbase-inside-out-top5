@@ -5,5 +5,5 @@
 SELECT 
   'N/A' AS user_id,
   'Please inquire with Tech Support for this information' AS user_name,
-  0 AS metric_value,
-  'manual data' AS unit;
+  NULL AS metric_value,
+  '' AS unit;

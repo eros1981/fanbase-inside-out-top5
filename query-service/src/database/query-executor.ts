@@ -28,13 +28,27 @@ export async function executeQuery(category: string, month: string): Promise<any
     });
 
     // Transform results to match expected format
-    const transformedResults = rows.map((row: any, index: number) => ({
-      rank: index + 1, // Simple ranking for now
-      user: row.display_name || row.user_name || 'Unknown',
-      user_id: row.user_id,
-      value: parseFloat(row.metric_value) || 0,
-      unit: row.unit || 'points'
-    }));
+    const transformedResults = rows.map((row: any, index: number) => {
+      // Special handling for Product Whisperer - no rank number and clean formatting
+      if (category === 'product_whisperer') {
+        return {
+          rank: null, // No rank number for Product Whisperer
+          user: row.display_name || row.user_name || 'Unknown',
+          user_id: row.user_id,
+          value: null, // No value for Product Whisperer
+          unit: '' // Empty unit for Product Whisperer
+        };
+      }
+      
+      // Normal handling for other categories
+      return {
+        rank: index + 1, // Simple ranking for now
+        user: row.display_name || row.user_name || 'Unknown',
+        user_id: row.user_id,
+        value: parseFloat(row.metric_value) || 0,
+        unit: row.unit || 'points'
+      };
+    });
 
     logger.debug(`Query executed successfully for ${category}`, {
       month,
