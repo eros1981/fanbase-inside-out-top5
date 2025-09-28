@@ -1,6 +1,6 @@
 import { App, LogLevel } from '@slack/bolt';
 import { config } from 'dotenv';
-import { handleInsideOutCommand, handleInsideOutExamplesCommand } from './handlers/insideout-command';
+import { handleInsideOutCommand } from './handlers/insideout-command';
 import { verifyHRAccess } from './middleware/auth';
 import { logger } from './utils/logger';
 
