@@ -28,6 +28,8 @@ export async function handleInsideOutCommand(
 
     // Validate category if specified
     const validCategories = ['monetizer', 'content_machine', 'eyeball_emperor', 'host_with_the_most', 'product_whisperer', 'all'];
+    console.log('Category validation:', { category, validCategories, includes: validCategories.includes(category) });
+    
     if (category && !validCategories.includes(category)) {
       logger.warn('Invalid category provided', { category, validCategories });
       await respond({

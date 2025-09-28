@@ -89,5 +89,8 @@ export function parseCommandArgs(text: string): { month: string; year: string; c
     year = now.getFullYear().toString();
   }
 
+  // Debug: Log final parsed result
+  console.log('Final parsed result:', { month, year, category });
+  
   return { month, year, category };
 }
