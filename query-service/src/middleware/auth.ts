@@ -22,7 +22,7 @@ export async function verifyHMAC(request: FastifyRequest, reply: FastifyReply) {
   }
 
   if (!hmacSecret) {
-    logger.error('HMAC_SECRET_SHARED not configured');
+    logger.error('HMAC_SECRET_SHARED not configured', { hmacSecret });
     return reply.status(500).send({ error: 'Server configuration error' });
   }
 
