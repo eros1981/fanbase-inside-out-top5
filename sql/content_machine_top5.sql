@@ -1,33 +1,53 @@
 -- Top 5 Content Machine query for BigQuery
--- Returns the top 5 users by content creation metrics for the specified month
+-- Based on get_top_content stored procedure
+-- Returns the top 5 users by content creation for the specified month
 -- Uses parameterized query with $1 as the month parameter (YYYY-MM format)
 
-WITH content_metrics AS (
-  SELECT 
-    u.user_id,
-    u.display_name,
-    COUNT(c.content_id) as total_content,
-    'posts' as unit
-  FROM `758470639878.fanbase_data.users` u
-  LEFT JOIN `758470639878.fanbase_data.content` c ON u.user_id = c.user_id
-  WHERE DATE_TRUNC(PARSE_DATE('%Y-%m', $1), MONTH) = DATE_TRUNC(c.created_at, MONTH)
-  GROUP BY u.user_id, u.display_name
+WITH content AS (
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.flickz`
+  UNION ALL
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.posts`
+  UNION ALL
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.tvs`
+  UNION ALL
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.livestreams`
+  WHERE status = 'recorded'
+  UNION ALL
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.voice_channels`
+  WHERE state = 'close'
+  UNION ALL
+  SELECT created_at, user_id FROM `758470639878.fanbase-reporting.stories`
 ),
-ranked_content_creators AS (
-  SELECT 
+monthly_content AS (
+  SELECT
+    DATE_FORMAT(created_at, '%Y-%m-01') AS period,
     user_id,
-    display_name,
+    COUNT(*) AS total_content
+  FROM content
+  WHERE DATE_FORMAT(created_at, '%Y-%m') = $1
+  GROUP BY period, user_id
+),
+active_monthly_content AS (
+  SELECT mc.period, mc.user_id, mc.total_content
+  FROM monthly_content mc
+  JOIN `758470639878.fanbase-reporting.users` u ON u.id = mc.user_id
+  WHERE u.suspended IS NULL 
+    AND u.id IN (1502307,408175,1429274,47925,24971,48190,1506452,37642,1420845,382837,6936,117,279659,380963,351567,1429452,1506337,424980,1291548,212883,17898,654385,1522723,209251,13202,1506448,1418561,1503807,16938,1162563,546441,181,216994,1417193,554500,1435337,1466314,1435335,12688)
+),
+ranked AS (
+  SELECT
+    period,
+    user_id,
     total_content,
-    unit,
-    ROW_NUMBER() OVER (ORDER BY total_content DESC, user_id) as rank
-  FROM content_metrics
-  WHERE total_content > 0
+    ROW_NUMBER() OVER (PARTITION BY period ORDER BY total_content DESC) AS position
+  FROM active_monthly_content
 )
-SELECT 
-  user_id,
-  display_name,
-  total_content as metric_value,
-  unit
-FROM ranked_content_creators
-WHERE rank <= 5
-ORDER BY rank;
+SELECT
+  r.user_id,
+  u.name AS user_name,
+  r.total_content AS metric_value,
+  'posts' AS unit
+FROM ranked r
+JOIN `758470639878.fanbase-reporting.users` u ON u.id = r.user_id
+WHERE r.position <= 5
+ORDER BY r.position;

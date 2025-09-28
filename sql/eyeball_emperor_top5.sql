@@ -1,33 +1,50 @@
 -- Top 5 Eyeball Emperor query for BigQuery
--- Returns the top 5 users by engagement/view metrics for the specified month
+-- Based on get_top_views stored procedure
+-- Returns the top 5 users by view metrics for the specified month
 -- Uses parameterized query with $1 as the month parameter (YYYY-MM format)
 
-WITH engagement_metrics AS (
-  SELECT 
-    u.user_id,
-    u.display_name,
-    COALESCE(SUM(e.views), 0) as total_views,
-    'views' as unit
-  FROM `758470639878.fanbase_data.users` u
-  LEFT JOIN `758470639878.fanbase_data.engagement` e ON u.user_id = e.user_id
-  WHERE DATE_TRUNC(PARSE_DATE('%Y-%m', $1), MONTH) = DATE_TRUNC(e.created_at, MONTH)
-  GROUP BY u.user_id, u.display_name
+WITH views AS (
+  SELECT created_at, user_id, views_count FROM `758470639878.fanbase-reporting.flickz`
+  UNION ALL
+  SELECT created_at, user_id, views_count FROM `758470639878.fanbase-reporting.posts`
+  UNION ALL
+  SELECT created_at, user_id, views_count FROM `758470639878.fanbase-reporting.tvs`
+  UNION ALL
+  SELECT created_at, user_id, views_count FROM `758470639878.fanbase-reporting.livestreams` 
+  WHERE status = 'recorded'
+  UNION ALL
+  SELECT created_at, user_id, views_count FROM `758470639878.fanbase-reporting.stories`
 ),
-ranked_eyeball_emperors AS (
-  SELECT 
+monthly_views AS (
+  SELECT
+    DATE_FORMAT(created_at, '%Y-%m-01') AS period,
     user_id,
-    display_name,
+    SUM(views_count) AS total_views
+  FROM views
+  WHERE DATE_FORMAT(created_at, '%Y-%m') = $1
+  GROUP BY period, user_id
+),
+active_monthly_views AS (
+  SELECT mv.period, mv.user_id, mv.total_views
+  FROM monthly_views mv
+  JOIN `758470639878.fanbase-reporting.users` u ON u.id = mv.user_id
+  WHERE u.suspended IS NULL 
+    AND u.id IN (1502307,408175,1429274,47925,24971,48190,1506452,37642,1420845,382837,6936,117,279659,380963,351567,1429452,1506337,424980,1291548,212883,17898,654385,1522723,209251,13202,1506448,1418561,1503807,16938,1162563,546441,181,216994,1417193,554500,1435337,1466314,1435335,12688)
+),
+ranked AS (
+  SELECT
+    period,
+    user_id,
     total_views,
-    unit,
-    ROW_NUMBER() OVER (ORDER BY total_views DESC, user_id) as rank
-  FROM engagement_metrics
-  WHERE total_views > 0
+    ROW_NUMBER() OVER (PARTITION BY period ORDER BY total_views DESC) AS position
+  FROM active_monthly_views
 )
-SELECT 
-  user_id,
-  display_name,
-  total_views as metric_value,
-  unit
-FROM ranked_eyeball_emperors
-WHERE rank <= 5
-ORDER BY rank;
+SELECT
+  r.user_id,
+  u.name AS user_name,
+  r.total_views AS metric_value,
+  'views' AS unit
+FROM ranked r
+JOIN `758470639878.fanbase-reporting.users` u ON u.id = r.user_id
+WHERE r.position <= 5
+ORDER BY r.position;
