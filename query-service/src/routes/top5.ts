@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { queryTop5Data } from '../services/query-service';
+import { getLastUpdatedTimestamp } from '../database/query-executor';
 import { logger } from '../utils/logger';
 
 // Request body interface
@@ -38,13 +39,17 @@ export async function top5Handler(fastify: FastifyInstance) {
 
       logger.info('Processing top5 request', { month, category });
 
-      // Query the data
-      const results = await queryTop5Data(month, category);
+      // Query the data and get last updated timestamp
+      const [results, lastUpdated] = await Promise.all([
+        queryTop5Data(month, category),
+        getLastUpdatedTimestamp()
+      ]);
 
       // Format response
       const response = {
         period: month,
         results: results,
+        lastUpdated: lastUpdated,
         notes: ['Ties share the same rank; next rank is offset accordingly.']
       };
 

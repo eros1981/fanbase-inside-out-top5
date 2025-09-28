@@ -5,7 +5,7 @@
  * @returns Block Kit blocks for Slack
  */
 export function formatTop5Response(data: any, requestedCategory: string): any[] {
-  const { period, results, notes } = data;
+  const { period, results, notes, lastUpdated } = data;
   
   // Format period for display (e.g., "2025-08" -> "August 2025")
   const [year, month] = period.split('-');
@@ -88,13 +88,17 @@ export function formatTop5Response(data: any, requestedCategory: string): any[] 
     }
   });
 
-  // Add context footer
+  // Add context footer with last updated timestamp
+  const contextText = lastUpdated && lastUpdated !== 'Unknown' 
+    ? `📊 Data as of ${new Date().toLocaleDateString()} | Last updated: ${lastUpdated} | ${notes ? notes.join(' ') : 'Ties share the same rank'}`
+    : `📊 Data as of ${new Date().toLocaleDateString()} | ${notes ? notes.join(' ') : 'Ties share the same rank'}`;
+    
   blocks.push({
     type: 'context',
     elements: [
       {
         type: 'mrkdwn',
-        text: `📊 Data as of ${new Date().toLocaleDateString()} | ${notes ? notes.join(' ') : 'Ties share the same rank'}`
+        text: contextText
       }
     ]
   });

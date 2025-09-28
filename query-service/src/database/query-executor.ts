@@ -61,3 +61,41 @@ export async function executeQuery(category: string, month: string): Promise<any
     throw error;
   }
 }
+
+/**
+ * Gets the last updated timestamp from BigQuery
+ * @returns Promise with last updated timestamp
+ */
+export async function getLastUpdatedTimestamp(): Promise<string> {
+  const bigquery = getBigQuery();
+  
+  try {
+    // Load the SQL query file for last updated timestamp
+    const sqlFile = join('/sql', 'get_last_updated.sql');
+    const query = readFileSync(sqlFile, 'utf8');
+
+    // Execute the query
+    const [rows] = await bigquery.query({
+      query,
+      location: 'US',
+    });
+
+    if (rows.length > 0 && rows[0].last_updated) {
+      const timestamp = new Date(rows[0].last_updated);
+      return timestamp.toLocaleString('en-US', {
+        timeZone: 'UTC',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }) + ' UTC';
+    }
+
+    return 'Unknown';
+  } catch (error) {
+    logger.error('Error getting last updated timestamp:', error);
+    return 'Unknown';
+  }
+}
