@@ -12,6 +12,8 @@ WITH views AS (
   WHERE status = 'recorded'
   UNION ALL
   SELECT created_at, user_id, views_count FROM `758470639878.reporting_db.stories`
+  UNION ALL
+  SELECT created_at, user_id, views_count FROM `758470639878.reporting_db.tvs`
 ),
 monthly_views AS (
   SELECT
