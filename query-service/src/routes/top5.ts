@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { queryTop5Data } from '../services/query-service';
 import { getLastUpdatedTimestamp } from '../database/query-executor';
+import { queryTop5Data } from '../services/query-service';
 import { logger } from '../utils/logger';
 
 // Request body interface

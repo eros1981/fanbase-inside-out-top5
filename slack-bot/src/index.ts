@@ -53,41 +53,6 @@ app.command('/insideout', async ({ command, ack, respond, client }) => {
   }
 });
 
-// Register examples command handler
-app.command('/insideout-examples', async ({ command, ack, respond, client }) => {
-  try {
-    // Acknowledge the command immediately
-    await ack();
-
-    // Debug: Log command received
-    logger.info('Examples command received', { 
-      userId: command.user_id, 
-      text: command.text,
-      channel: command.channel_id 
-    });
-
-    // Verify HR access
-    const hasAccess = await verifyHRAccess(client, command.user_id);
-    logger.info('HR access check result', { userId: command.user_id, hasAccess });
-    
-    if (!hasAccess) {
-      await respond({
-        text: '❌ Access denied. This command is restricted to HR team members.',
-        response_type: 'ephemeral'
-      });
-      return;
-    }
-
-    // Handle the examples command
-    await handleInsideOutExamplesCommand(command, respond);
-  } catch (error) {
-    logger.error('Error handling /insideout-examples command:', error);
-    await respond({
-      text: '❌ An error occurred while processing your request. Please try again later.',
-      response_type: 'ephemeral'
-    });
-  }
-});
 
 // Note: Health endpoint removed due to Slack Bolt limitations
 // We'll use the startup logs to debug environment variables

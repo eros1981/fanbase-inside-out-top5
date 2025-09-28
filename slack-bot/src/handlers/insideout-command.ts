@@ -15,7 +15,16 @@ export async function handleInsideOutCommand(
   respond: (response: any) => Promise<void>
 ): Promise<void> {
   try {
-    // Send immediate loading message
+    // Check for subcommands first
+    const commandText = command.text.trim().toLowerCase();
+    
+    if (commandText === 'examples' || commandText === 'help') {
+      // Handle examples subcommand
+      await handleInsideOutExamplesCommand(command, respond);
+      return;
+    }
+
+    // Send immediate loading message for main command
     const loadingResponse = await respond({
       text: '🔄 Fetching top 5 data... This may take a moment.',
       blocks: [
@@ -129,7 +138,7 @@ export async function handleInsideOutExamplesCommand(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '*📚 Inside-Out Top 5 Command Examples*\n\n*Basic Usage:*\n`/insideout top5 [month] [year] [category]`\n\n*Examples:*\n• `/insideout top5 aug 2025 all` - All categories for August 2025\n• `/insideout top5 sept 2025 monetizer` - Monetizer only for September 2025\n• `/insideout top5 jan 2025 content_machine` - Content Machine only for January 2025\n• `/insideout top5 dec 2024 eyeball_emperor` - Eyeball Emperor only for December 2024\n• `/insideout top5 nov 2024 host_with_the_most` - Host With The Most only for November 2024\n• `/insideout top5 oct 2024 product_whisperer` - Product Whisperer only for October 2024'
+        text: '*📚 Inside-Out Top 5 Command Examples*\n\n*Basic Usage:*\n`/insideout top5 [month] [year] [category]`\n`/insideout examples` - Show this help\n\n*Examples:*\n• `/insideout top5 aug 2025 all` - All categories for August 2025\n• `/insideout top5 sept 2025 monetizer` - Monetizer only for September 2025\n• `/insideout top5 jan 2025 content_machine` - Content Machine only for January 2025\n• `/insideout top5 dec 2024 eyeball_emperor` - Eyeball Emperor only for December 2024\n• `/insideout top5 nov 2024 host_with_the_most` - Host With The Most only for November 2024\n• `/insideout top5 oct 2024 product_whisperer` - Product Whisperer only for October 2024\n• `/insideout examples` - Show this help guide'
       }
     },
     {

@@ -18,12 +18,7 @@ features:
     - command: /insideout
       url: https://fanbase-slack-bot-production.up.railway.app/slack/events
       description: Query top 5 performers in Inside-Out categories
-      usage_hint: top5 [month] [year] [category|all]
-      should_escape: false
-    - command: /insideout-examples
-      url: https://fanbase-slack-bot-production.up.railway.app/slack/events
-      description: Show examples and usage guide for Inside-Out commands
-      usage_hint: ""
+      usage_hint: top5 [month] [year] [category|all] or examples
       should_escape: false
 
 oauth_config:
