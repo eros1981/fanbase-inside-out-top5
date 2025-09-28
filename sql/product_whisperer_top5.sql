@@ -1,56 +1,33 @@
--- Top 5 Product Whisperers query
--- This query should return the top 5 users by product feedback/contribution metrics
--- Replace table names and column names with your actual schema
+-- Top 5 Product Whisperer query for BigQuery
+-- Returns the top 5 users by product feedback/engagement metrics for the specified month
+-- Uses parameterized query with $1 as the month parameter (YYYY-MM format)
 
-WITH product_metrics AS (
+WITH feedback_metrics AS (
   SELECT 
     u.user_id,
     u.display_name,
-    COUNT(f.feedback_id) as feedback_count,
-    'suggestions' as unit
-  FROM users u
-  LEFT JOIN product_feedback f ON u.user_id = f.user_id
-  WHERE DATE_TRUNC('month', f.submitted_at) = $1::date
-    AND f.status = 'accepted' -- Only count accepted feedback
+    COUNT(f.feedback_id) as total_feedback,
+    'feedback items' as unit
+  FROM `758470639878.fanbase_data.users` u
+  LEFT JOIN `758470639878.fanbase_data.product_feedback` f ON u.user_id = f.user_id
+  WHERE DATE_TRUNC(PARSE_DATE('%Y-%m', $1), MONTH) = DATE_TRUNC(f.created_at, MONTH)
   GROUP BY u.user_id, u.display_name
 ),
-ranked_product_whisperers AS (
+ranked_whisperers AS (
   SELECT 
     user_id,
     display_name,
-    feedback_count,
+    total_feedback,
     unit,
-    ROW_NUMBER() OVER (ORDER BY feedback_count DESC, user_id) as rank
-  FROM product_metrics
-  WHERE feedback_count > 0
+    ROW_NUMBER() OVER (ORDER BY total_feedback DESC, user_id) as rank
+  FROM feedback_metrics
+  WHERE total_feedback > 0
 )
 SELECT 
   user_id,
   display_name,
-  feedback_count as metric_value,
+  total_feedback as metric_value,
   unit
-FROM ranked_product_whisperers
+FROM ranked_whisperers
 WHERE rank <= 5
 ORDER BY rank;
-
--- Example alternative query structure if you have different schema:
--- WITH monthly_feedback AS (
---   SELECT 
---     user_id,
---     COUNT(*) as feedback_count
---   FROM product_suggestions 
---   WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM $1::date)
---     AND EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM $1::date)
---     AND status IN ('accepted', 'implemented')
---   GROUP BY user_id
--- )
--- SELECT 
---   u.id as user_id,
---   u.name as display_name,
---   COALESCE(mf.feedback_count, 0) as metric_value,
---   'suggestions' as unit
--- FROM users u
--- LEFT JOIN monthly_feedback mf ON u.id = mf.user_id
--- WHERE COALESCE(mf.feedback_count, 0) > 0
--- ORDER BY metric_value DESC
--- LIMIT 5;

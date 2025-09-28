@@ -1,6 +1,6 @@
 -- Top 5 Monetizers query for BigQuery
--- This query should return the top 5 users by revenue/monetization metrics
--- Replace table names and column names with your actual schema
+-- Returns the top 5 users by revenue/monetization metrics for the specified month
+-- Uses parameterized query with $1 as the month parameter (YYYY-MM format)
 
 WITH monetizer_metrics AS (
   SELECT 
@@ -8,8 +8,8 @@ WITH monetizer_metrics AS (
     u.display_name,
     COALESCE(SUM(r.revenue), 0) as total_revenue,
     'USD' as unit
-  FROM `your_project.your_dataset.users` u
-  LEFT JOIN `your_project.your_dataset.revenue_transactions` r ON u.user_id = r.user_id
+  FROM `758470639878.fanbase_data.users` u
+  LEFT JOIN `758470639878.fanbase_data.revenue_transactions` r ON u.user_id = r.user_id
   WHERE DATE_TRUNC(PARSE_DATE('%Y-%m', $1), MONTH) = DATE_TRUNC(r.created_at, MONTH)
   GROUP BY u.user_id, u.display_name
 ),
