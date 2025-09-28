@@ -15,7 +15,7 @@ export async function executeQuery(category: string, month: string): Promise<any
   
   try {
     // Load the SQL query file
-    const sqlFile = join(process.cwd(), '..', 'sql', `${category}_top5.sql`);
+    const sqlFile = join('/sql', `${category}_top5.sql`);
     let query = readFileSync(sqlFile, 'utf8');
 
     // Replace $1 parameter with the month value for BigQuery

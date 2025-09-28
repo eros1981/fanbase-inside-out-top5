@@ -13,6 +13,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Copy SQL files from parent directory
+COPY ../sql /sql
+
 # Build the application
 RUN npm run build
 
