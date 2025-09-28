@@ -1,5 +1,6 @@
 # Use Node.js 20 Alpine image
 # Force rebuild - updated SQL files with BigQuery syntax
+# Cache bust - v2
 FROM node:20-alpine
 
 # Set working directory
@@ -14,7 +15,7 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Copy SQL files
+# Copy SQL files (updated with BigQuery FORMAT_DATE syntax)
 COPY sql /sql
 
 # Build the application

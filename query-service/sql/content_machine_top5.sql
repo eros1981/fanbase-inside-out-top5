@@ -17,11 +17,11 @@ WITH content AS (
 ),
 monthly_content AS (
   SELECT
-    DATE_FORMAT(created_at, '%Y-%m-01') AS period,
+    FORMAT_DATE('%Y-%m-01', created_at) AS period,
     user_id,
     COUNT(*) AS total_content
   FROM content
-  WHERE DATE_FORMAT(created_at, '%Y-%m') = $1
+  WHERE FORMAT_DATE('%Y-%m', created_at) = $1
   GROUP BY period, user_id
 ),
 active_monthly_content AS (

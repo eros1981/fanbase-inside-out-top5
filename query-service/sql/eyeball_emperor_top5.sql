@@ -15,11 +15,11 @@ WITH views AS (
 ),
 monthly_views AS (
   SELECT
-    DATE_FORMAT(created_at, '%Y-%m-01') AS period,
+    FORMAT_DATE('%Y-%m-01', created_at) AS period,
     user_id,
     SUM(views_count) AS total_views
   FROM views
-  WHERE DATE_FORMAT(created_at, '%Y-%m') = $1
+  WHERE FORMAT_DATE('%Y-%m', created_at) = $1
   GROUP BY period, user_id
 ),
 active_monthly_views AS (
