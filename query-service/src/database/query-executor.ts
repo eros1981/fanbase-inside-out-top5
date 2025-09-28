@@ -19,7 +19,7 @@ export async function executeQuery(category: string, month: string): Promise<any
     let query = readFileSync(sqlFile, 'utf8');
 
     // Replace $1 parameter with the month value for BigQuery
-    query = query.replace(/\$1::date/g, `'${month}'`);
+    query = query.replace(/\$1/g, `'${month}'`);
 
     // Execute the query
     const [rows] = await bigquery.query({
