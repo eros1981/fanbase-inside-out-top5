@@ -1,4 +1,5 @@
 # Use Node.js 20 Alpine image
+# Force rebuild - updated SQL files with BigQuery syntax
 FROM node:20-alpine
 
 # Set working directory
