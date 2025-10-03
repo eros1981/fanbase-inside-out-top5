@@ -16,9 +16,12 @@ features:
     always_online: false
   slash_commands:
     - command: /insideout
-      url: https://fanbase-slack-bot-production.up.railway.app/slack/events
       description: Query top 5 performers in Inside-Out categories
       usage_hint: top5 [month] [year] [category|all] or examples
+      should_escape: false
+    - command: /health
+      description: Check bot health status
+      usage_hint: Check bot health and connection status
       should_escape: false
 
 oauth_config:
@@ -32,11 +35,6 @@ oauth_config:
       - channels:history
 
 settings:
-  event_subscriptions:
-    bot_events:
-      - app_mention
-  interactivity:
-    is_enabled: true
   org_deploy_enabled: false
   socket_mode_enabled: true
   token_rotation_enabled: false
