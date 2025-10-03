@@ -4,9 +4,13 @@ import { handleInsideOutCommand } from './handlers/insideout-command';
 import { verifyHRAccess } from './middleware/auth';
 import { healthMonitor } from './utils/health-monitor';
 import { logger } from './utils/logger';
+import { socketModeWrapper } from './utils/socket-mode-wrapper';
 
 // Load environment variables
 config();
+
+// Initialize Socket Mode wrapper for enhanced error handling
+socketModeWrapper.initialize();
 
 // Initialize Slack app with enhanced error handling for Socket Mode
 const app = new App({
@@ -91,6 +95,7 @@ app.command('/health', async ({ command, ack, respond, client }) => {
 let isShuttingDown = false;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
+let appInstance: App | null = null;
 
 // Handle uncaught exceptions and unhandled rejections
 process.on('uncaughtException', (error) => {
@@ -102,6 +107,16 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection:', { promise, reason });
+  
+  // Check if this is the specific Socket Mode error we're trying to handle
+  if (reason instanceof Error && reason.message.includes('server explicit disconnect')) {
+    logger.warn('Socket Mode disconnect detected - attempting recovery instead of shutdown');
+    if (!isShuttingDown && appInstance) {
+      attemptRecovery();
+      return;
+    }
+  }
+  
   if (!isShuttingDown) {
     gracefulShutdown();
   }
@@ -117,6 +132,9 @@ async function gracefulShutdown() {
     // Stop health monitoring
     healthMonitor.stopHealthChecks();
     
+    // Cleanup Socket Mode wrapper
+    socketModeWrapper.cleanup();
+    
     // Log final health status
     logger.info('Final health status:', healthMonitor.getHealthStatus());
     
@@ -129,6 +147,48 @@ async function gracefulShutdown() {
   }
 }
 
+// Recovery function for Socket Mode disconnections
+async function attemptRecovery() {
+  if (isShuttingDown || reconnectAttempts >= maxReconnectAttempts) {
+    logger.error('Max recovery attempts reached or shutting down');
+    gracefulShutdown();
+    return;
+  }
+
+  reconnectAttempts++;
+  logger.info(`Attempting recovery #${reconnectAttempts}/${maxReconnectAttempts}`);
+  
+  try {
+    // Stop the current app instance
+    if (appInstance) {
+      await appInstance.stop();
+      logger.info('Stopped current app instance');
+    }
+    
+    // Wait a bit before restarting
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+    logger.info(`Waiting ${delay}ms before restart...`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    
+    // Restart the app
+    if (!isShuttingDown) {
+      await startApp();
+    }
+  } catch (error) {
+    logger.error('Recovery attempt failed:', error);
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      gracefulShutdown();
+    } else {
+      // Try again after a longer delay
+      setTimeout(() => {
+        if (!isShuttingDown) {
+          attemptRecovery();
+        }
+      }, 5000);
+    }
+  }
+}
+
 // Handle termination signals
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
@@ -136,6 +196,8 @@ process.on('SIGINT', gracefulShutdown);
 // Enhanced app startup with retry logic
 async function startApp() {
   try {
+    // Store app instance for recovery
+    appInstance = app;
     await app.start();
     logger.info('🚀 Slack bot is running!');
     logger.info('Environment check', {
@@ -154,6 +216,7 @@ async function startApp() {
     // We'll monitor connection status through health checks instead
     logger.info('Socket Mode connection established');
     healthMonitor.updateSocketModeStatus(true);
+    socketModeWrapper.onConnectionEstablished();
 
     // Start health monitoring
     healthMonitor.startHealthChecks(30000); // Check every 30 seconds
